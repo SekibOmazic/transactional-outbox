@@ -1,0 +1,111 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: order-microservice
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/microservices
+    username: postgres
+    password: postgres
+    pool:
+      initial-size: 10
+      max-size: 20
+
+  flyway:
+    url: jdbc:postgresql://localhost:5432/microservices
+    user: postgres
+    password: postgres
+    schemas: [ "microservices" ]
+
+  kafka:
+    consumer:
+      group-id: order-service-group-id
+    bootstrap-servers: localhost:9092
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      authentication-database: admin
+      username: admin
+      password: admin
+      database: bank_accounts
+
+#springdoc: http://localhost:8080/webjars/swagger-ui/index.html#/
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+
+schedulers:
+  outbox:
+    enable: true
+    initialDelayMillis: 3000
+    fixedRate: 1000
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: INFO
+    com.alexbryksin.ordersmicroservice.order.repository.OutboxBaseRepositoryImpl: INFO
+
+
+topics:
+  orderCreated:
+    name: order-created
+    partitions: 3
+    replication: 1
+  productAdded:
+    name: product-added
+    partitions: 3
+    replication: 1
+  productRemoved:
+    name: product-added
+    partitions: 3
+    replication: 1
+  orderPaid:
+    name: order-paid
+    partitions: 3
+    replication: 1
+  orderCancelled:
+    name: order-cancelled
+    partitions: 3
+    replication: 1
+  orderSubmitted:
+    name: order-submitted
+    partitions: 3
+    replication: 1
+  orderCompleted:
+    name: order-completed
+    partitions: 3
+    replication: 1
+
+  retryTopic:
+    name: retry-topic
+    partitions: 3
+    replication: 1
+
+  deadLetterQueue:
+    name: dead-letter-queue
+    partitions: 3
+    replication: 1
